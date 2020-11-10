@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "mcradio",
   "version": "${version}",
 
-  "name": "Example Mod",
+  "name": "MCRadio",
   "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
-    "Me!"
+    "ph0t0shop"
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
@@ -23,7 +23,7 @@
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "mcradio.mixins.json"
   ],
 
   "depends": {
