@@ -1,4 +1,4 @@
-package net.fabricmc.example;
+package com.github.ph0t0shop.mcradio.audio;
 
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormatTools;
 import com.sedmelluq.discord.lavaplayer.format.Pcm16AudioDataFormat;
@@ -19,6 +19,7 @@ public class PCMAudioStream implements AudioStream {
     private AudioInputStream is;
     private int maxBuffSize = 176400;
     private byte[] tempBuff = new byte[maxBuffSize];
+    private ByteBuffer byteBuff = ByteBuffer.allocateDirect(maxBuffSize).order(ByteOrder.LITTLE_ENDIAN);
 
     public PCMAudioStream(AudioInputStream is) {
         this.is = is;
@@ -33,16 +34,17 @@ public class PCMAudioStream implements AudioStream {
     @Override
     public ByteBuffer getBuffer(int size) throws IOException {
         if (size > maxBuffSize) {
-            this.tempBuff = new byte[size];
             maxBuffSize = size;
+            this.tempBuff = new byte[size];
+            byteBuff = ByteBuffer.allocateDirect(size).order(ByteOrder.LITTLE_ENDIAN);
         }
         // size = Math.min(is.available(), size);
-        System.out.println(is.read(this.tempBuff, 0, size));
-        ByteBuffer buff = ByteBuffer.allocateDirect(size).order(ByteOrder.LITTLE_ENDIAN);
-        buff.put(this.tempBuff, 0, size);
-        buff.flip();
+        is.read(this.tempBuff, 0, size); // discard
+        byteBuff.clear();
+        byteBuff.put(this.tempBuff, 0, size);
+        byteBuff.flip();
 //        byte[] buff = new byte[size];
-        return buff;
+        return byteBuff;
     }
 
     @Override

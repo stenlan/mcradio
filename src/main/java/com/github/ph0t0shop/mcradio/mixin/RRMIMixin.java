@@ -1,4 +1,4 @@
-package net.fabricmc.example.mixin;
+package com.github.ph0t0shop.mcradio.mixin;
 
 import net.minecraft.resource.NamespaceResourceManager;
 import net.minecraft.resource.ReloadableResourceManagerImpl;

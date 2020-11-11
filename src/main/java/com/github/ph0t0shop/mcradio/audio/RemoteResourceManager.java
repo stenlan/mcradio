@@ -1,4 +1,4 @@
-package net.fabricmc.example;
+package com.github.ph0t0shop.mcradio.audio;
 
 import com.sedmelluq.discord.lavaplayer.filter.*;
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat;
@@ -25,6 +25,7 @@ public class RemoteResourceManager extends NamespaceResourceManager {
     private static AudioDataFormat dataFormat = COMMON_PCM_S16_LE;
     private AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
     private AudioPlayer player;
+    private AudioLoadResultHandler resultHandler;
 
     public RemoteResourceManager(ResourceType type, String namespace) {
         super(type, namespace);
@@ -32,37 +33,21 @@ public class RemoteResourceManager extends NamespaceResourceManager {
         AudioSourceManagers.registerRemoteSources(playerManager);
         player = playerManager.createPlayer();
         player.setFilterFactory(new StereoToMonoFilterFactory(playerManager.getConfiguration()));
+        resultHandler = new AlwaysPlayResultHandler();
     }
 
     public RemoteResourceManager(){
-        this(ResourceType.CLIENT_RESOURCES, "remote");
+        this(ResourceType.CLIENT_RESOURCES, "mcradio_remote");
     }
 
     @Override
     public Resource getResource(Identifier id) throws IOException {
-        playerManager.loadItem("https://www.youtube.com/watch?v=k0dMSDwZj2g", new AudioLoadResultHandler() { // id.getPath
-            @Override
-            public void trackLoaded(AudioTrack track) {
-                System.out.println("Playing!");
-                player.playTrack(track);
-            }
+        return this.getResource((RemoteAudioIdentifier) id);
+    }
 
-            @Override
-            public void playlistLoaded(AudioPlaylist playlist) {
-                player.playTrack(playlist.getTracks().get(0));
-            }
-
-            @Override
-            public void noMatches() {
-                // Notify the user that we've got nothing
-            }
-
-            @Override
-            public void loadFailed(FriendlyException throwable) {
-                // Notify the user that everything exploded
-            }
-        });
-        return new ResourceImpl("", id, AudioPlayerInputStream.createStream(player, dataFormat, 5000L, false), null);
+    private Resource getResource(RemoteAudioIdentifier id) throws IOException {
+        playerManager.loadItem(id.getPath(), resultHandler);
+        return new ResourceImpl("", id, AudioPlayerInputStream.createStream(player, dataFormat, 0, true), null);
     }
 
     private static class StereoToMonoFilterFactory implements PcmFilterFactory {
@@ -88,6 +73,30 @@ public class RemoteResourceManager extends NamespaceResourceManager {
                 initialized = true;
             }
             return filterList;
+        }
+    }
+
+    private class AlwaysPlayResultHandler implements AudioLoadResultHandler {
+        @Override
+        public void trackLoaded(AudioTrack track) {
+            System.out.println("Playing from single track");
+            player.playTrack(track);
+        }
+
+        @Override
+        public void playlistLoaded(AudioPlaylist playlist) {
+            System.out.println("Playing first track from playlist");
+            player.playTrack(playlist.getTracks().get(0));
+        }
+
+        @Override
+        public void noMatches() {
+            // Notify the user that we've got nothing
+        }
+
+        @Override
+        public void loadFailed(FriendlyException throwable) {
+            // Notify the user that everything exploded
         }
     }
 }

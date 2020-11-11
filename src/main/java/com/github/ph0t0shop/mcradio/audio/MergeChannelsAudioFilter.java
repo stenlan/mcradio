@@ -1,4 +1,4 @@
-package net.fabricmc.example;
+package com.github.ph0t0shop.mcradio.audio;
 
 import com.sedmelluq.discord.lavaplayer.filter.FloatPcmAudioFilter;
 import com.sedmelluq.discord.lavaplayer.filter.ShortPcmAudioFilter;

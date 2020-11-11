@@ -1,22 +1,16 @@
-package net.fabricmc.example.mixin;
+package com.github.ph0t0shop.mcradio.mixin;
 
-import net.fabricmc.example.ExampleMod;
+import com.github.ph0t0shop.mcradio.MCRadio;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.resource.NamespaceResourceManager;
-import net.minecraft.resource.ReloadableResourceManager;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.Map;
 
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
     @Inject(method = "<init>", at=@At("RETURN"))
     public void afterResourceLoadInject(CallbackInfo ci) {
-        ExampleMod.onResourceLoad();
+        MCRadio.onResourceLoad();
     }
 }

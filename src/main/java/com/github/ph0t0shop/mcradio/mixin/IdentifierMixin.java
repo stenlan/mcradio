@@ -1,4 +1,4 @@
-package net.fabricmc.example.mixin;
+package com.github.ph0t0shop.mcradio.mixin;
 
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +15,7 @@ public abstract class IdentifierMixin {
 
     @Redirect(method="<init>([Ljava/lang/String;)V", at=@At(value="INVOKE", target="Lnet/minecraft/util/Identifier;isPathValid(Ljava/lang/String;)Z"))
     private boolean isValidRedirect(String path, String[] id) {
-        if (id[0].equals("remote")) return true;
+        if (id[0].equals("mcradio_remote")) return true;
         else return (isPathValid(path));
     }
 }
