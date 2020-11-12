@@ -6,7 +6,6 @@
   "mixins": [
   ],
   "client": [
-    "IdentifierMixin",
     "MinecraftClientMixin",
     "RRMIMixin",
     "SoundLoaderMixin"

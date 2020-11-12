@@ -23,9 +23,7 @@ public class RadioBlock extends Block implements BlockEntityProvider {
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (!world.isClient) {
-            player.sendMessage(new LiteralText("Hello, world!"), false);
-        } else {
+        if (world.isClient) {
             MinecraftClient.getInstance().openScreen(new RadioBlockScreen((RadioBlockEntity)world.getBlockEntity(pos)));
         }
 

@@ -1,6 +1,6 @@
 package com.github.ph0t0shop.mcradio;
 
-import com.github.ph0t0shop.mcradio.audio.RemoteResourceManager;
+import com.github.ph0t0shop.mcradio.audio.RadioResourceManager;
 import com.github.ph0t0shop.mcradio.block.RadioBlock;
 import com.github.ph0t0shop.mcradio.block.RadioBlockEntity;
 import net.fabricmc.api.ModInitializer;
@@ -52,10 +52,10 @@ public class MCRadio implements ModInitializer {
 			});
 		});
 
-		// new PositionedRemoteSoundInstance(new Identifier("mcradio_remote", "https://www.youtube.com/watch?v=k0dMSDwZj2g"), SoundCategory.MUSIC, 1.0F, 1.0F, false, 0, SoundInstance.AttenuationType.NONE, 0.0D, 0.0D, 0.0D, true);
+		// new RadioSoundInstance(new Identifier("mcradio_remote", "https://www.youtube.com/watch?v=k0dMSDwZj2g"), SoundCategory.MUSIC, 1.0F, 1.0F, false, 0, SoundInstance.AttenuationType.NONE, 0.0D, 0.0D, 0.0D, true);
 	}
 
 	public static void onResourceLoad() {
-		((RRMIMixin)MinecraftClient.getInstance().getResourceManager()).getNamespaceManagers().put("mcradio_remote", new RemoteResourceManager());
+		((RRMIMixin)MinecraftClient.getInstance().getResourceManager()).getNamespaceManagers().put("mcradio_remote", RadioResourceManager.getInstance());
 	}
 }

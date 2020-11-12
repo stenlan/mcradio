@@ -1,6 +1,8 @@
 package com.github.ph0t0shop.mcradio.mixin;
 
 import com.github.ph0t0shop.mcradio.audio.PCMAudioStream;
+import com.github.ph0t0shop.mcradio.audio.PlayerWrapper;
+import com.sedmelluq.discord.lavaplayer.format.AudioPlayerInputStream;
 import net.minecraft.client.sound.AudioStream;
 import net.minecraft.client.sound.SoundLoader;
 import net.minecraft.resource.Resource;
@@ -19,7 +21,7 @@ public class SoundLoaderMixin {
     @Inject(method="method_19745", at=@At(value="INVOKE_ASSIGN", target="Lnet/minecraft/resource/Resource;getInputStream()Ljava/io/InputStream;"), locals= LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void loadStreamedInject(Identifier identifier, boolean arg1, CallbackInfoReturnable<AudioStream> cir, Resource resource, InputStream inputStream) {
         if (identifier.getNamespace().equals("mcradio_remote")) {
-            cir.setReturnValue(new PCMAudioStream((AudioInputStream) inputStream));
+            cir.setReturnValue(new PCMAudioStream((PlayerWrapper) inputStream));
         }
     }
 }

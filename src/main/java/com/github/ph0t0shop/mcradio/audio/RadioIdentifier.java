@@ -2,13 +2,12 @@ package com.github.ph0t0shop.mcradio.audio;
 
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import org.apache.commons.lang3.StringUtils;
 
-public class RemoteAudioIdentifier extends Identifier {
+public class RadioIdentifier extends Identifier {
     private BlockPos speakerPos;
 
-    public RemoteAudioIdentifier(String url, BlockPos pos) {
-        super("mcradio_remote", url);
+    public RadioIdentifier(BlockPos pos) {
+        super("mcradio_remote", Long.toString(pos.asLong()));
         this.speakerPos = pos;
     }
 
@@ -22,6 +21,10 @@ public class RemoteAudioIdentifier extends Identifier {
 
     public double getSpeakerZ() {
         return speakerPos.getZ() + 0.5;
+    }
+
+    public BlockPos getSpeakerPos() {
+        return this.speakerPos;
     }
 
 }
