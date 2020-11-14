@@ -29,13 +29,32 @@ public class PCMAudioStream extends AudioEventAdapter implements AudioStream {
 
     public PCMAudioStream(PlayerWrapper is) {
         this.is = is;
-        is.getPlayer().addListener(this);
+        is.addListener(this);
+    }
+
+    public void stop() {
+        this.stopped = true;
     }
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        System.out.println("stopped");
-        this.stopped = true;
+        if (is.ignoreStop()) { // we still have a stream going
+            // do nothing
+            is.ignoredStop();
+        } else {
+            System.out.println("stopped");
+            try {
+                this.close();
+                this.stop();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+//        try {
+//            this.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
@@ -54,11 +73,12 @@ public class PCMAudioStream extends AudioEventAdapter implements AudioStream {
         }
         // size = Math.min(is.available(), size);
         byteBuff.clear();
+        is.read(this.tempBuff, 0, size); // discard
         if (stopped) {
+            System.out.println("Returning empty buffer");
             byteBuff.flip(); // return empty buffer
             return byteBuff;
         }
-        is.read(this.tempBuff, 0, size); // discard
         byteBuff.put(this.tempBuff, 0, size);
         byteBuff.flip();
 //        byte[] buff = new byte[size];
@@ -68,6 +88,6 @@ public class PCMAudioStream extends AudioEventAdapter implements AudioStream {
     @Override
     public void close() throws IOException {
         is.close();
-        is.getPlayer().removeListener(this);
+        is.removeListener(this);
     }
 }

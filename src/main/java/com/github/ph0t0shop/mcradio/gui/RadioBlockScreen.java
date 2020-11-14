@@ -18,6 +18,8 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.ArrayList;
+
 @Environment(EnvType.CLIENT)
 public class RadioBlockScreen extends Screen {
     private static final Text titleText = new TranslatableText("mcradio:radio_gui_title");
@@ -25,7 +27,16 @@ public class RadioBlockScreen extends Screen {
     private TextFieldWidget urlTextField;
     private ButtonWidget doneButton;
     private ButtonWidget cancelButton;
+    private TexturedDropdownWidget sourceDropdown;
+    private static ArrayList<TexturedDropdownWidget.GuiTexture> dropdownTextures = new ArrayList<>();
     private RadioBlockEntity blockEntity;
+    private boolean firstOpen = true;
+
+    static {
+        dropdownTextures.add(new TexturedDropdownWidget.GuiTexture(TexturedDropdownWidget.RADIO_SOURCES_TEXTURE, 0, 40, "ytsearch:"));
+        dropdownTextures.add(new TexturedDropdownWidget.GuiTexture(TexturedDropdownWidget.RADIO_SOURCES_TEXTURE, 0, 60, "scsearch:"));
+        dropdownTextures.add(new TexturedDropdownWidget.GuiTexture(TexturedDropdownWidget.RADIO_SOURCES_TEXTURE, 0, 80, ""));
+    }
 
     public RadioBlockScreen(RadioBlockEntity blockEntity) {
         super(NarratorManager.EMPTY);
@@ -35,9 +46,8 @@ public class RadioBlockScreen extends Screen {
     @Override
     protected void init() {
         this.client.keyboard.setRepeatEvents(true);
-        this.urlTextField = this.addChild(new TextFieldWidget(this.textRenderer, this.width / 8,  40, this.width * 3 / 4, 20, LiteralText.EMPTY));
+        this.urlTextField = this.addChild(new TextFieldWidget(this.textRenderer, this.width / 8 + 50,  40, this.width * 3 / 4 - 50, 20, LiteralText.EMPTY));
         this.urlTextField.setMaxLength(Integer.MAX_VALUE);
-        this.urlTextField.setText(blockEntity.getUrl());
 
         int buttonWidth = Math.min(200, this.width / 2 - 30);
 
@@ -47,6 +57,17 @@ public class RadioBlockScreen extends Screen {
         this.cancelButton = this.addButton(new ButtonWidget(this.width / 2 + 10, this.height - 40, buttonWidth, 20, ScreenTexts.CANCEL, (button -> {
             this.onClose();
         })));
+        this.sourceDropdown = this.addButton(new TexturedDropdownWidget(this.width / 8, 40, 50, 20, dropdownTextures, 20, 20, (button -> {
+        })));
+
+        this.sourceDropdown.selectOption(blockEntity.getUrl());
+        this.urlTextField.setText(blockEntity.getUrl().substring(this.sourceDropdown.getPrefix().length()));
+
+        if (firstOpen) {
+            firstOpen = false;
+            this.setFocused(this.urlTextField);
+            this.urlTextField.setSelected(true);
+        }
     }
 
     @Override
@@ -74,7 +95,7 @@ public class RadioBlockScreen extends Screen {
     private void confirmAndClose() {
         PacketByteBuf packet = new PacketByteBuf(Unpooled.buffer());
         packet.writeBlockPos(this.blockEntity.getPos());
-        packet.writeString(this.urlTextField.getText()); // TODO: prefix
+        packet.writeString(this.sourceDropdown.getPrefix() + this.urlTextField.getText()); // TODO: prefix
         ClientSidePacketRegistry.INSTANCE.sendToServer(MCRadio.UPDATE_RADIO_ADDRESS_PACKET_ID, packet);
         this.onClose();
     }

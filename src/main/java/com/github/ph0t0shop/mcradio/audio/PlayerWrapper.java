@@ -11,10 +11,14 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.sound.SoundInstance;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,15 +31,27 @@ public class PlayerWrapper extends InputStream {
     private AudioPlayerManager manager;
     private AudioLoadResultHandler handler;
     private AudioPlayerInputStream stream;
+    private ArrayList<PCMAudioStream> pcmStreams = new ArrayList<>();
+    private boolean ignoreComingTrackStop = false;
 
     public PlayerWrapper() {
         manager = new DefaultAudioPlayerManager();
         manager.getConfiguration().setOutputFormat(dataFormat);
         AudioSourceManagers.registerRemoteSources(manager);
         player = manager.createPlayer();
-        player.setFilterFactory(new StereoToMonoFilterFactory(manager.getConfiguration()));
+        player.setFilterFactory(new StereoToMonoFilterFactory());
         handler = new AlwaysPlayResultHandler();
         stream = new AudioPlayerInputStream(dataFormat, player, 0, true);
+    }
+
+    public void addListener(PCMAudioStream pcmStream) {
+        this.player.addListener(pcmStream);
+        this.pcmStreams.add(pcmStream);
+    }
+
+    public void removeListener(PCMAudioStream pcmStream) {
+        this.player.removeListener(pcmStream);
+        this.pcmStreams.remove(pcmStream);
     }
 
     @Override
@@ -58,6 +74,10 @@ public class PlayerWrapper extends InputStream {
         stream.close();
     }
 
+    public boolean hasStreams() {
+        return this.pcmStreams.size() > 0;
+    }
+
     public AudioPlayer getPlayer() {
         return player;
     }
@@ -66,8 +86,23 @@ public class PlayerWrapper extends InputStream {
         return manager;
     }
 
-    public void playImmediate(String identifier) {
+    public void playImmediate(String identifier, BlockPos pos, float volume, int attenuation, SoundInstance.AttenuationType attenuationType) {
+        // player = manager.createPlayer();
+//      player.setFilterFactory(new StereoToMonoFilterFactory(manager.getConfiguration()));
+        if (!this.hasStreams()) {
+            MinecraftClient.getInstance().getSoundManager().play(new RadioSoundInstance(new RadioIdentifier(pos), volume, attenuation, attenuationType));
+        } else {
+            ignoreComingTrackStop = true;
+        }
         this.manager.loadItem(identifier, handler);
+    }
+
+    public boolean ignoreStop() {
+        return this.ignoreComingTrackStop;
+    }
+
+    public void ignoredStop() {
+        this.ignoreComingTrackStop = false;
     }
 
 
@@ -96,21 +131,10 @@ public class PlayerWrapper extends InputStream {
     }
 
     private static class StereoToMonoFilterFactory implements PcmFilterFactory {
-        boolean initialized = false;
-        private List<AudioFilter> filterList;
-        private AudioConfiguration config;
-
-        public StereoToMonoFilterFactory(AudioConfiguration config) {
-            this.config = config;
-        }
-
         @Override
         public List<AudioFilter> buildChain(AudioTrack track, AudioDataFormat format, UniversalPcmAudioFilter output) {
-            if (!initialized) {
-                filterList = Collections.singletonList(new MergeChannelsAudioFilter(output));
-                initialized = true;
-            }
-            return filterList;
+            return Collections.singletonList(new MergeChannelsAudioFilter(output));
         }
+
     }
 }

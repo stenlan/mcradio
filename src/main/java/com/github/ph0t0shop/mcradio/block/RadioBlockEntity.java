@@ -50,8 +50,7 @@ public class RadioBlockEntity extends BlockEntity implements BlockEntityClientSe
                 LogManager.getLogger().warn("fromClientTag called on server, this shouldn't happen!");
                 return;
             }
-            player.playImmediate(this.url);
-            MinecraftClient.getInstance().getSoundManager().play(new RadioSoundInstance(new RadioIdentifier(this.pos), 4.0F, 16, SoundInstance.AttenuationType.LINEAR));
+            player.playImmediate(this.url, this.pos, 4.0F, 16, SoundInstance.AttenuationType.LINEAR);
         }
     }
 
